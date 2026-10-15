@@ -1,0 +1,38 @@
+{
+  "model_name": "AxiomOcean",
+  "manuscript_role": "10-day 23-level 3D ocean forecast (not AxiomOcean-RS)",
+  "delivery": "split ONNX + ORT CUDA hybrid inference",
+  "grid": {
+    "depth_levels": 23,
+    "latitude": 2040,
+    "longitude": 4320,
+    "patch_size": 6
+  },
+  "ocean_vars_order": ["so", "thetao", "uo", "vo"],
+  "surface_vars_order": ["d2m", "msl", "mtpr", "ssr", "strd", "t2m", "u10", "v10"],
+  "history": {
+    "ocean_times": 2,
+    "surface_times": 2,
+    "comment": "Inputs are two consecutive daily states; ocean in physical units; surface ERA5-normalised."
+  },
+  "outputs": {
+    "physical_units": true,
+    "netcdf_vars": ["thetao", "so", "uo", "vo"],
+    "shape": [1, 23, 2040, 4320],
+    "dtype": "float32"
+  },
+  "onnx_files": {
+    "precision": "fp32",
+    "1d_encoder": "models/axiomocean_1d_encoder_backbone_fp32.onnx",
+    "1d_decoder_chunk": "models/axiomocean_1d_decoder_head_chunk_fp32.onnx",
+    "5d_encoder": "models/axiomocean_5d_encoder_backbone_fp32.onnx",
+    "5d_decoder_chunk": "models/axiomocean_5d_decoder_head_chunk_fp32.onnx",
+    "notes": "Split encoder + chunked decoder. Hybrid: leads 1-5 use 1d; leads 6-10 use 5d."
+  },
+  "runtime_requirements": {
+    "python": "3.8+",
+    "onnxruntime-gpu": "1.18.0",
+    "providers": ["CUDAExecutionProvider"],
+    "note": "CPU EP fails Cos on this graph; use CUDA."
+  }
+}

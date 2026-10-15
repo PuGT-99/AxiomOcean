@@ -1,0 +1,19 @@
+# AxiomOcean ONNX Runtime (CUDA) inference environment.
+# Target: Linux x86_64, Python 3.8+, NVIDIA driver >= 525.
+
+numpy==1.24.4
+Pillow==10.4.0
+requests==2.32.3
+scipy==1.10.1
+pandas==2.0.3
+PyYAML==6.0.1
+
+# ONNX Runtime GPU (CUDA 12.x + cuDNN 8). Prefer 1.18.0 over 1.18.1
+# if your stack is cuDNN 8 (1.18.1 CUDA builds often expect cuDNN 9).
+onnxruntime-gpu==1.18.0
+protobuf==4.25.3
+
+# Forecast I/O
+xarray==2023.1.0
+netCDF4==1.6.5
+tqdm==4.66.4

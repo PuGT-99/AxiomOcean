@@ -1,0 +1,34 @@
+# FP32 ONNX weights - distributed via GitHub Releases
+/models/*.onnx
+/models/*.onnx.data
+
+# Forecast outputs
+/outputs/
+/results/
+/logs/
+
+# Local datasets
+/data/
+*.nc
+*.npy
+*.npz
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Local environment variables
+.env
+.env.*
+!.env.example
+
+# Distribution archives
+/dist/
+*.zip
+
+# System files
+.DS_Store
+Thumbs.db
