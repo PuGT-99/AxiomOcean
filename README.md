@@ -78,7 +78,6 @@ Users must prepare the following datasets locally:
 
 The model input/output specifications, including variable order and grid information, are documented in `metadata/model_io_spec.json`.
 
-The input datasets are not included in this repository.
 
 ## 6. Run a 10-Day Forecast
 
@@ -111,15 +110,3 @@ This release includes:
 - Trained model weights
 - Hybrid inference scripts
 - Model input/output specifications
-
-The original PyTorch training pipeline and training datasets are not included.
-
-## 8. Citation
-
-If you use AxiomOcean in your research, please cite the accompanying manuscript.
-
-Full citation information will be added upon publication.
-
-## 9. License
-
-Licensing and third-party attribution information will be finalized before the public release.
