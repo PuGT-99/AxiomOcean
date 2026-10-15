@@ -1,57 +1,125 @@
-# AxiomOcean（ONNX 推理包）
+# AxiomOcean
 
-10 天、23 层三维海洋预报。对外只提供 **ONNX 权重 + hybrid 推理脚本**。
+**AxiomOcean: Global Three-Dimensional Ocean Forecasting**
 
-## 目录
+This repository provides the **FP32 ONNX model weights and inference scripts** for AxiomOcean, a global three-dimensional ocean forecasting model with 23 vertical levels.
+
+The release supports 10-day hybrid forecasts through a combination of 1-day and 5-day forecasting models.
+
+## 1. Overview
+
+- **Forecast variables:** potential temperature (`thetao`), salinity (`so`), and ocean currents (`uo`, `vo`)
+- **Spatial coverage:** global ocean
+- **Vertical resolution:** 23 depth levels
+- **Forecast horizon:** 10 days
+- **Inference framework:** ONNX Runtime with CUDA Execution Provider
+- **Model precision:** FP32
+
+The hybrid forecasting strategy uses the 1-day model for forecast leads 1–5 and the 5-day model for leads 6–10, with the latter initialized from earlier 1-day forecast states.
+
+## 2. Repository Structure
 
 ```text
-axiomocean_manuscript_release/
+AxiomOcean/
 ├── README.md
 ├── requirements.txt
-├── metadata/model_io_spec.json   # 输入 / 输出说明
-├── models/                       # FP32 ONNX（1d + 5d）
+├── metadata/
+│   └── model_io_spec.json
+├── models/
+│   └── README.md
 └── scripts/
-    ├── run_infer_hybrid_example.sh   # 唯一入口
+    ├── run_infer_hybrid_example.sh
     ├── infer_hybrid_rollout.py
-    ├── infer_1day_autoregressive.py  # hybrid 内部复用，勿单独当入口
+    ├── infer_1day_autoregressive.py
     └── onnx_runtime.py
 ```
 
-## 环境
+## 3. Model Weights
 
-- Linux + NVIDIA GPU，`onnxruntime-gpu`（CUDA EP；CPU 跑不通本图）
-- `pip install -r requirements.txt`
+The trained FP32 ONNX models are distributed separately through [GitHub Releases](https://github.com/PuGT-99/AxiomOcean/releases).
 
-## 数据（需自行准备）
+Download both archives:
 
-通过环境变量指向本地数据根目录：
+- `axiomocean_1d_fp32.zip` — 1-day forecasting model
+- `axiomocean_5d_fp32.zip` — 5-day forecasting model
 
-| 变量 | 含义 |
-|------|------|
-| `TEST_DATA_DIR` | 海洋初值（物理量） |
-| `ERA5_DATA_DIR` | 大气强迫（已归一化） |
-| `CLIMATOLOGY_DIR` | 气候态 |
+Extract both archives into the `models/` directory.
 
-变量顺序、网格见 `metadata/model_io_spec.json`。
+Each model consists of an encoder/backbone graph and a chunked decoder graph, together with their associated external weight files (`.onnx.data`).
 
-## 跑 10 天混合预报
+Both models are required for the complete 10-day hybrid forecast.
 
-日程与文稿一致：Lead 1–5 用 1 天模型；Lead 6–10 用 5 天模型（输入为更早的 1 天状态）。
+## 4. Environment
+
+Inference requires:
+
+- Linux
+- NVIDIA GPU with CUDA support
+- Python
+- ONNX Runtime with CUDA Execution Provider
+
+Install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+CPU execution is not supported for the released graphs.
+
+## 5. Input Data
+
+Users must prepare the following datasets locally:
+
+| Environment Variable | Description |
+|---|---|
+| `TEST_DATA_DIR` | Ocean initial conditions in physical units |
+| `ERA5_DATA_DIR` | Normalized ERA5 atmospheric forcing fields |
+| `CLIMATOLOGY_DIR` | Climatological fields used for forecast evaluation |
+
+The model input/output specifications, including variable order and grid information, are documented in `metadata/model_io_spec.json`.
+
+The input datasets are not included in this repository.
+
+## 6. Run a 10-Day Forecast
+
+Set the paths to the input datasets:
 
 ```bash
 export TEST_DATA_DIR=/path/to/ocean
 export ERA5_DATA_DIR=/path/to/era5_norm
 export CLIMATOLOGY_DIR=/path/to/climatology
-
-START_DATE=2020-01-01 END_DATE=2020-01-01 MAX_LEADTIME=10 \
-  bash scripts/run_infer_hybrid_example.sh
 ```
 
-## 模型文件
+Run the hybrid forecasting workflow:
 
-| 文件 | 用途 |
-|------|------|
-| `axiomocean_1d_encoder_backbone_fp32.onnx[.data]` | 1 天 encoder |
-| `axiomocean_1d_decoder_head_chunk_fp32.onnx[.data]` | 1 天 decoder 分块 |
-| `axiomocean_5d_encoder_backbone_fp32.onnx[.data]` | 5 天 encoder |
-| `axiomocean_5d_decoder_head_chunk_fp32.onnx[.data]` | 5 天 decoder 分块 |
+```bash
+START_DATE=2020-01-01 \
+END_DATE=2020-01-01 \
+MAX_LEADTIME=10 \
+bash scripts/run_infer_hybrid_example.sh
+```
+
+Forecast outputs are written to `outputs/` by default.
+
+The recommended entry point is `scripts/run_infer_hybrid_example.sh`. The other inference scripts are internal components of the hybrid forecasting workflow.
+
+## 7. Model Availability and Scope
+
+This release includes:
+
+- FP32 ONNX computational graphs
+- Trained model weights
+- Hybrid inference scripts
+- Model input/output specifications
+
+The original PyTorch training pipeline and training datasets are not included.
+
+## 8. Citation
+
+If you use AxiomOcean in your research, please cite the accompanying manuscript.
+
+Full citation information will be added upon publication.
+
+## 9. License
+
+Licensing and third-party attribution information will be finalized before the public release.
